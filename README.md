@@ -7,11 +7,15 @@ sudo apt-get update && sudo apt-get install -y wmctrl x11-utils gnome-screenshot
 ```
 
 ```sh
-uv sync
+uv venv -p python3.10
 ```
 
 ```sh
 source .venv/bin/activate
+```
+
+```sh
+uv pip install .
 ```
 
 ## Set Gemini API Key
