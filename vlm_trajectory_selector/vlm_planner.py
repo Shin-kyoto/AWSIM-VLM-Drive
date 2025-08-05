@@ -24,6 +24,7 @@ class TrajectoryResponse(typing.TypedDict):
     current_sector: int
     trajectory_points: list[TrajectoryPoint3D]
     reasoning: str
+    command: str
 
 class VLMPlanner:
     """
@@ -32,6 +33,7 @@ class VLMPlanner:
     def __init__(self, logger):
         self.logger = logger
         self.model = None
+        self.last_commands = []  # VLMが推論したコマンド履歴
         self._setup_gemini()
 
     def _setup_gemini(self):
@@ -68,7 +70,7 @@ class VLMPlanner:
 
         processed_image = self._preprocess_image(image)
         
-        prompt = create_trajectory_prompt(last_trajectory_action, last_sector, current_velocity, current_position)
+        prompt = create_trajectory_prompt(last_trajectory_action, last_sector, current_velocity, current_position, self.last_commands)
         
         try:
             start = time.perf_counter()
@@ -87,9 +89,12 @@ class VLMPlanner:
             trajectory_points = response_dict.get("trajectory_points", [])
             current_sector = response_dict.get("current_sector", last_sector)
             reasoning = response_dict.get("reasoning", "")
+            command = response_dict.get("command", "go straight")
+            self.last_commands.append(command)
 
             self.logger.info(f"Generated {len(trajectory_points)} points. sector: {current_sector}")
             self.logger.info(f"Reasoning: {reasoning}")
+            self.logger.info(f"Command: {command}")
 
             return trajectory_points, current_sector
                 
