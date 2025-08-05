@@ -43,11 +43,8 @@ Selects the best trajectory from a set of candidate trajectories based on camera
 
 **Run:**
 ```sh
-# Run the trajectory selector node
-ros2 run vlm_trajectory_selector trajectory_selector.py
-
-# Or with custom topics
-ros2 run vlm_trajectory_selector trajectory_selector.py --ros-args -p input_topic:=/custom/input -p output_topic:=/custom/output
+# Run the trajectory selector node with custom topics
+python -m trajectory_selector --ros-args -p input_topic:="/vad/output/trajectories_base" -p output_topic:="/planning/vad/auto/trajectory"
 ```
 
 **Topics:**
@@ -67,18 +64,15 @@ Generates complete trajectories from scratch using VLM inference based on camera
 
 **Run:**
 ```sh
-# Run the VLM planner node
-ros2 run vlm_trajectory_selector vlm_planner_node.py
-
-# Or with custom output topic
-ros2 run vlm_trajectory_selector vlm_planner_node.py --ros-args -p output_topic:=/custom/trajectory
+# Run the VLM planner node with custom output topic
+python vlm_planner_node.py --ros-args -p output_topic:="/planning/vad/auto/trajectory"
 ```
 
 **Topics:**
 - Subscribe:
   - `/sensing/camera/image_raw` (Image)
-  - `~/input/kinematic_state` (Odometry)
-  - `~/input/acceleration` (AccelWithCovarianceStamped)
+  - `/localization/kinematic_state` (Odometry)
+  - `/localization/acceleration` (AccelWithCovarianceStamped)
 - Publish:
   - `/output/trajectory` (Trajectory)
 
