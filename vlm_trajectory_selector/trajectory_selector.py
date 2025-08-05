@@ -44,7 +44,7 @@ class VlmTrajectorySelectorNode(Node):
         self.latest_image = None
         # レート制限と結果のキャッシュのための変数 (実時間ベース)
         self.last_vlm_command = VLMCommand.GO_STRAIGHT
-        self.last_known_section = 1
+        self.last_known_sector = 1
         self.last_inference_time_sec = time.monotonic() # 最後の推論時刻を実時間で保存
         self.inference_interval_sec = 5.0               # 推論を実行する間隔 (実時間で5秒)
 
@@ -67,16 +67,16 @@ class VlmTrajectorySelectorNode(Node):
             self.get_logger().info("Interval passed. Performing VLM inference...")
             
             # VLMによる判断
-            vlm_command, current_section = self.vlm_selector.infer(
+            vlm_command, current_sector = self.vlm_selector.infer(
                 self.latest_image, 
                 self.last_vlm_command, 
-                self.last_known_section
+                self.last_known_sector
             )
             
             # 推論が成功した場合のみ、結果と時刻を更新
             if vlm_command != VLMCommand.NONE:
                 self.last_vlm_command = vlm_command
-                self.last_known_section = current_section
+                self.last_known_sector = current_sector
                 self.last_inference_time_sec = now_sec # 実時間で更新
             else:
                 self.get_logger().warn("VLM inference failed. Reusing last known command.")
@@ -86,7 +86,7 @@ class VlmTrajectorySelectorNode(Node):
             if self.latest_image is not None:
                 self.get_logger().info(f"Reusing last command: {self.last_vlm_command.name}")
 
-        self.get_logger().info(f"Command: {self.last_vlm_command.name}, Current Section: {self.last_known_section}")
+        self.get_logger().info(f"Command: {self.last_vlm_command.name}, Current sector: {self.last_known_sector}")
         # VLMの判断結果 (最新またはキャッシュされたもの) をインデックスに変換
         if self.last_vlm_command == VLMCommand.TURN_RIGHT:
             selected_index = 0

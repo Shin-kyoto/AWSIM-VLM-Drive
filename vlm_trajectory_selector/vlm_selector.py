@@ -19,7 +19,7 @@ class VLMCommand(Enum):
 class VlmResponse(typing.TypedDict):
     action: str
     reason: str
-    current_section: int
+    current_sector: int
 
 class ControlCommand(typing.TypedDict):
     """Geminiに渡すレスポンススキーマ"""
@@ -34,8 +34,8 @@ class VLMSelector:
         self.logger = logger
         self.model = None
         self._setup_gemini()
-        self.track_knowledge = """Track Sections:
-                                1: Starting Straight. At the end of the straight in section 1, there is section 2: a right-hand hairpin. In section 2, there is a white sign. When you see the white sign, you must turn the steering wheel all the way to the right.
+        self.track_knowledge = """Track sectors:
+                                1: Starting Straight. At the end of the straight in sector 1, there is sector 2: a right-hand hairpin. In sector 2, there is a white sign. When you see the white sign, you must turn the steering wheel all the way to the right.
                                 2: R-Hairpin (Hint: Turn hard R at the white big sign board)
                                 3: Short Straight
                                 4: L-Hairpin
@@ -73,7 +73,7 @@ class VLMSelector:
         pil_image = pil_image.resize((w // 4, (crop_box[3] - crop_box[1]) // 4))
         return pil_image
 
-    def infer(self, image: Image, last_action: VLMCommand, last_section: int) -> VLMCommand:
+    def infer(self, image: Image, last_action: VLMCommand, last_sector: int) -> VLMCommand:
         """
         与えられた画像を元に、VLMで進むべき方向を推論します。
         """
@@ -90,8 +90,8 @@ class VLMSelector:
         {self.track_knowledge}
         History:
         - Last Action: {last_action.value}
-        - Last Section: {last_section}
-        Your task: Determine the current section and next action.
+        - Last sector: {last_sector}
+        Your task: Determine the current sector and next action.
         """
         
         try:
@@ -109,7 +109,7 @@ class VLMSelector:
 
             response_dict = json.loads(response.text.strip())
             action_str = response_dict.get("action")
-            current_section = response_dict.get("current_section", last_section)
+            current_sector = response_dict.get("current_sector", last_sector)
 
             # 文字列からEnumに変換して返す
             action_map = {
@@ -118,7 +118,7 @@ class VLMSelector:
                 "S": VLMCommand.GO_STRAIGHT,
             }
             new_action = action_map.get(action_str, VLMCommand.NONE)
-            return new_action, current_section
+            return new_action, current_sector
                 
         except Exception as e:
             self.logger.error(f"Error during VLM inference: {e}")
