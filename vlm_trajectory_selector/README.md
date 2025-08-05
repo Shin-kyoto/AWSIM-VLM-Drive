@@ -132,3 +132,9 @@ The VLM components use Google's Gemini 2.5 Flash Lite model for fast inference w
 - `VlmPlannerNode` handles ROS 2 communication and vehicle state management
 
 Both components are designed to be modular and can be used independently depending on your autonomous driving pipeline requirements.
+
+
+## Acknowledgment
+
+The implementation of this code was greatly inspired by the following repository. Many thanks for their excellent work:
+https://github.com/soyaoki/AWSIM-VLM-Drive
